@@ -8,31 +8,45 @@ from django.db.models.query import QuerySet
 
 class BaseManager:
     # To retain order, track each time a Manager instance is created.
+    # 创建次数: 要查询使用Manger的次数,可以在每次Manager实例创建时跟踪
     creation_counter = 0
 
     # Set to True for the 'objects' managers that are automatically created.
+    # 当 objects manager 是自动创建时设置为True
     auto_created = False
 
     #: If set to True the manager will be serialized into migrations and will
     #: thus be available in e.g. RunPython operations.
+    # 此项如果设置为True, 管理器将被序列化为迁移文件, 可以在RunPython等操作中使用
     use_in_migrations = False
 
     def __new__(cls, *args, **kwargs):
         # Capture the arguments to make returning them trivial.
+        # 使用父类(object)的__new__方法创建新实例, 并使用实例的_constructor_args属性
+        # 保存传入的参数
         obj = super().__new__(cls)
         obj._constructor_args = (args, kwargs)
         return obj
 
     def __init__(self):
         super().__init__()
+        # 每次调用过构造方法, 去调用_set_creation_counter()方法来增加创造实例数
         self._set_creation_counter()
+        # 如下属性设置为None或者空值
         self.model = None
         self.name = None
         self._db = None
         self._hints = {}
+        # 构造方法完成后, 创建出继承自BaseManager的实例
+        # 名称                初始值
+        # creation_counter  该实例创建之前BaseManager的此项类属性的值
+        # model             None
+        # _db               None
+        # _hints            None
 
     def __str__(self):
         """Return "app_label.model_label.manager_name"."""
+        # 类的__str__表现形式 --> 实例.模型._meta.label.实例.name
         return '%s.%s' % (self.model._meta.label, self.name)
 
     def deconstruct(self):
@@ -119,6 +133,8 @@ class BaseManager:
         Set the creation counter value for this instance and increment the
         class-level copy.
         """
+        # 创建出实例的属性 creation_counter 存储为BaseManager的类属性creation_counter的值
+        # 之后BaseManager的creation_counter自增1
         self.creation_counter = BaseManager.creation_counter
         BaseManager.creation_counter += 1
 
