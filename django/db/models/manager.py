@@ -51,26 +51,44 @@ class BaseManager:
 
     def deconstruct(self):
         """
+        解构方法
+        :return: 5个元素的元素, 包含如下项目
+        as_manager      是否是管理器
+        manager_class   管理器所属的类
+        queryset_class  查询集所属的类
+        args & kwargs   构造管理器时传入的位置及关键字参数
         Return a 5-tuple of the form (as_manager (True), manager_class,
         queryset_class, args, kwargs).
 
         Raise a ValueError if the manager is dynamically generated.
+        如果manager是动态生成的话, 会抛出ValueError异常
         """
+        # TODO _queryset_class 属性的创建时间与位置?
         qs_class = self._queryset_class
         if getattr(self, '_built_with_as_manager', False):
+            # 如果实例包含_built_with_as_manager属性的时候, 将会返回如下结果
+            # TODO _built_with_as_manager 属性的创建时间与位置?
             # using MyQuerySet.as_manager()
             return (
                 True,  # as_manager
                 None,  # manager_class
+                # qs_class 的字符串表示, __module__表示qs_class的导入模块名称
+                # __test__是qs_class所在文件的文件名称
                 '%s.%s' % (qs_class.__module__, qs_class.__name__),  # qs_class
                 None,  # args
                 None,  # kwargs
             )
         else:
+            # 如果实例不包含_built_with_as_manager属性, 执行如下代码返回结果
+            # module_name为当前实例被导入模块的名称
             module_name = self.__module__
+            # name为当前实例所属的类所在文件的名称, __class__指向实例所属的类
             name = self.__class__.__name__
             # Make sure it's actually there and not an inner class
+            # 保证类确实存在, 并且不是一个内部类, 导入一次创建当前管理器所属的模块
+            # 如果导入失败, 将会抛出 ModuleNotFoundError 异常
             module = import_module(module_name)
+            # 如果导入的模块中没用当前管理器的类, 抛出ValueError
             if not hasattr(module, name):
                 raise ValueError(
                     "Could not find manager %s in %s.\n"
@@ -78,6 +96,7 @@ class BaseManager:
                     "dynamically generated with 'from_queryset()'."
                     % (name, module_name)
                 )
+            # 导入成功的话, 返回如下结果
             return (
                 False,  # as_manager
                 '%s.%s' % (module_name, name),  # manager_class
@@ -91,6 +110,11 @@ class BaseManager:
 
     @classmethod
     def _get_queryset_methods(cls, queryset_class):
+        '''
+        获取查询集中的方法
+        :param queryset_class: 传入的queryset_class
+        :return: 包含返回方法的dict new_methods
+        '''
         def create_method(name, method):
             def manager_method(self, *args, **kwargs):
                 return getattr(self.get_queryset(), name)(*args, **kwargs)
@@ -117,7 +141,7 @@ class BaseManager:
             class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__)
         return type(class_name, (cls,), {
             '_queryset_class': queryset_class,
-            **cls._get_queryset_methods(queryset_class),
+            cls._get_queryset_methods(queryset_class)
         })
 
     def contribute_to_class(self, model, name):
@@ -215,3 +239,6 @@ class EmptyManager(Manager):
 
     def get_queryset(self):
         return super().get_queryset().none()
+
+if __name__ == '__main__':
+    print('hello world')
