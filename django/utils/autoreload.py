@@ -225,6 +225,9 @@ def check_errors(fn):
             fn(*args, **kwargs)
         except Exception:
             _exception = sys.exc_info()
+            # sys.exc_info()返回一个当前处理异常信息的三元组, (type, value , traceback)
+            # 如果当前的函数调用堆栈没有异常, 则包含最近调用者的异常信息, 如果没有异常, 返回
+            # 三个None组成的元组
 
             et, ev, tb = _exception
 
@@ -237,8 +240,9 @@ def check_errors(fn):
             if filename not in _error_files:
                 _error_files.append(filename)
 
+            # 将异常信息处理完后, 抛出异常
             raise
-
+    # 返回内层函数的引用
     return wrapper
 
 

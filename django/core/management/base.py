@@ -41,10 +41,13 @@ class CommandParser(ArgumentParser):
     Customized ArgumentParser class to improve some error messages and prevent
     SystemExit in several occasions, as SystemExit is unacceptable when a
     command is called programmatically.
+    定制ArgumentParser类, 增加一些error, 保护某些情况下的SystemExit
     """
     def __init__(self, **kwargs):
+        # 如果kwargs中有mising_args_message/called_from_command_line, 取其值, 没有返回None
         self.missing_args_message = kwargs.pop('missing_args_message', None)
         self.called_from_command_line = kwargs.pop('called_from_command_line', None)
+        # 调用父类的构造方法
         super().__init__(**kwargs)
 
     def parse_args(self, args=None, namespace=None):
@@ -63,9 +66,11 @@ class CommandParser(ArgumentParser):
 
 def handle_default_options(options):
     """
+    处理默认选项
     Include any default options that all commands should accept here
     so that ManagementUtility can handle them before searching for
     user commands.
+    包括所有命令应在此接受的默认选项, 以便ManagementUtility可以在搜索之前可以处理它们
     """
     if options.settings:
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings

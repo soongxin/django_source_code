@@ -125,6 +125,7 @@ class BaseManager:
         new_methods = {}
         for name, method in inspect.getmembers(queryset_class, predicate=inspect.isfunction):
             # Only copy missing methods.
+            # 仅复制缺失的方法
             if hasattr(cls, name):
                 continue
             # Only copy public methods or methods with the attribute `queryset_only=False`.
@@ -132,6 +133,7 @@ class BaseManager:
             if queryset_only or (queryset_only is None and name.startswith('_')):
                 continue
             # Copy the method onto the manager.
+            # 创建了一个名字和方法引用的字典, 作为返回值
             new_methods[name] = create_method(name, method)
         return new_methods
 
@@ -141,7 +143,7 @@ class BaseManager:
             class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__)
         return type(class_name, (cls,), {
             '_queryset_class': queryset_class,
-            cls._get_queryset_methods(queryset_class)
+            **cls._get_queryset_methods(queryset_class)
         })
 
     def contribute_to_class(self, model, name):

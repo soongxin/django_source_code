@@ -10,6 +10,8 @@ def setup(set_prefix=True):
     Configure the settings (this happens as a side effect of accessing the
     first setting), configure logging and populate the app registry.
     Set the thread-local urlresolvers script prefix if `set_prefix` is True.
+    配置设置内容(这是进入第一次设置的副作用), 配置日志并填充app注册表.
+    如果set_prefix为True的话, 为本地线程的urlresolvers脚本添加前缀
     """
     from django.apps import apps
     from django.conf import settings

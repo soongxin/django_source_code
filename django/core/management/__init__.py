@@ -154,7 +154,9 @@ class ManagementUtility:
     """
     def __init__(self, argv=None):
         self.argv = argv or sys.argv[:]
+        # 获取传入参数中的文件或文件夹名字
         self.prog_name = os.path.basename(self.argv[0])
+        # 如果是__main__.py的话, 替换成 python -m django
         if self.prog_name == '__main__.py':
             self.prog_name = 'python -m django'
         self.settings_exception = None
@@ -304,6 +306,7 @@ class ManagementUtility:
         run, create a parser appropriate to that command, and run it.
         """
         try:
+            # 获取子命令, 获取错误的话, 执行help命令
             subcommand = self.argv[1]
         except IndexError:
             subcommand = 'help'  # Display help if no arguments were given.
@@ -311,17 +314,28 @@ class ManagementUtility:
         # Preprocess options to extract --settings and --pythonpath.
         # These options could affect the commands that are available, so they
         # must be processed early.
+        # 创建一个command解析实例, 传入使用方法, 不添加help, 不允许简写
         parser = CommandParser(usage='%(prog)s subcommand [options] [args]', add_help=False, allow_abbrev=False)
+        """
+        usage: 描述命令用法的短句
+        add_help: 为命令添加 -h/--help 选项
+        allow_abbrev: 如果缩写是明确的, 允许缩写长选项
+        """
+        # 给parser添加一些参数
         parser.add_argument('--settings')
         parser.add_argument('--pythonpath')
         parser.add_argument('args', nargs='*')  # catch-all
+        # 所有args的参数被收集成一个列表
         try:
+            # 尝试解析部分参数
             options, args = parser.parse_known_args(self.argv[2:])
+            # 在此处处理默认的选项
             handle_default_options(options)
         except CommandError:
             pass  # Ignore any option errors at this point.
 
         try:
+            # 尝试读取INSTALLED_APPS, 读取不到则将异常赋值给self.settings_exception
             settings.INSTALLED_APPS
         except ImproperlyConfigured as exc:
             self.settings_exception = exc
@@ -330,15 +344,21 @@ class ManagementUtility:
 
         if settings.configured:
             # Start the auto-reloading dev server even if the code is broken.
+            # 开启自动重新载入dev, 即使代码有错
             # The hardcoded condition is a code smell but we can't rely on a
             # flag on the command class because we haven't located it yet.
+            # 硬编码的条件是代码敏感的, 但是我们还不能依赖命令行上的标志, 因为我们还没有找到它
             if subcommand == 'runserver' and '--noreload' not in self.argv:
+                # 当子命令有runserver并且没有--noreload选项时
                 try:
+                    # 使用check_errors装饰器装饰以后, 执行
                     autoreload.check_errors(django.setup)()
                 except Exception:
                     # The exception will be raised later in the child process
                     # started by the autoreloader. Pretend it didn't happen by
                     # loading an empty list of applications.
+                    # 异常将稍后抛出
+                    # from django.apps import apps -> from .registry import apps -> apps = Apps(installed_apps=None)
                     apps.all_models = defaultdict(OrderedDict)
                     apps.app_configs = OrderedDict()
                     apps.apps_ready = apps.models_ready = apps.ready = True
@@ -353,6 +373,7 @@ class ManagementUtility:
                         self.argv.remove(_arg)
 
             # In all other cases, django.setup() is required to succeed.
+            # 在所有其他情况下, django.setup()都需要成功, 否则要抛出异常
             else:
                 django.setup()
 
