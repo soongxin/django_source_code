@@ -73,6 +73,7 @@ def configure_logging(logging_config, logging_settings):
 
         # ... then invoke it with the logging settings
         if logging_settings:
+            # 使用导入的dictConfig设置字典格式的日志配置
             logging_config_func(logging_settings)
 
 

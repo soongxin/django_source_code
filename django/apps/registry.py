@@ -13,15 +13,18 @@ from .config import AppConfig
 class Apps:
     """
     A registry that stores the configuration of installed applications.
-
     It also keeps track of models, e.g. to provide reverse relations.
+    用来存储配置中安装的applications的注册表, 同时跟踪models等, 以提供反向联系
     """
 
     def __init__(self, installed_apps=()):
         # installed_apps is set to None when creating the master registry
         # because it cannot be populated at that point. Other registries must
         # provide a list of installed apps and are populated immediately.
+        # 在创建master注册表时, installed_apps将会被置为None, 因为此时还不能填充
+        # 其他的注册表需要提供一个app的列表
         if installed_apps is None and hasattr(sys.modules[__name__], 'apps'):
+            # 当installed_apps并且apps已导入时
             raise RuntimeError("You must supply an installed_apps argument.")
 
         # Mapping of app labels => model names => model classes. Every time a

@@ -130,6 +130,7 @@ def clear_url_caches():
 def set_script_prefix(prefix):
     """
     Set the script prefix for the current thread.
+    为当前的线程设置脚本前缀
     """
     if not prefix.endswith('/'):
         prefix += '/'

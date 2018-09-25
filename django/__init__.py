@@ -18,9 +18,15 @@ def setup(set_prefix=True):
     from django.urls import set_script_prefix
     from django.utils.log import configure_logging
 
+    # default LOGGING_CONFIG = 'logging.config.dictConfig'
+    # from logging.config import dictConfig
+    # 这一步会将写入的日志设置配置完成
     configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+    
+    # 设置脚本前缀
     if set_prefix:
         set_script_prefix(
             '/' if settings.FORCE_SCRIPT_NAME is None else settings.FORCE_SCRIPT_NAME
         )
+    # 填充注册表
     apps.populate(settings.INSTALLED_APPS)

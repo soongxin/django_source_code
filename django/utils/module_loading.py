@@ -11,12 +11,14 @@ def import_string(dotted_path):
     """
     try:
         module_path, class_name = dotted_path.rsplit('.', 1)
+        # 'django.http.response' -> ['django.http', 'response']
     except ValueError as err:
         raise ImportError("%s doesn't look like a module path" % dotted_path) from err
 
     module = import_module(module_path)
 
     try:
+        # 返回从模块中获取的方法或模块
         return getattr(module, class_name)
     except AttributeError as err:
         raise ImportError('Module "%s" does not define a "%s" attribute/class' % (
